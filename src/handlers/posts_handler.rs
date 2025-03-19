@@ -6,6 +6,7 @@ use axum::{
     routing::{get, post},
 };
 use axum_messages::Messages;
+use tower_sessions::Session;
 
 pub fn posts_router() -> Router<AppState> {
     Router::new()
@@ -14,21 +15,29 @@ pub fn posts_router() -> Router<AppState> {
 }
 
 #[derive(Template)]
-#[template(path = "login.html")]
+#[template(path = "create-post.html")]
 struct CreatePostTemplate<'a> {
     title: &'a str,
     messages: Vec<String>,
+    auth_name: &'a str,
 }
 
-pub async fn create_post(messages: Messages) -> impl IntoResponse {
+pub async fn create_post(messages: Messages, session: Session) -> impl IntoResponse {
     let messages = messages
         .into_iter()
         .map(|message| format!("{}: {}", message.level, message))
         .collect::<Vec<_>>();
 
+    let auth_name = session
+        .get("auth_name")
+        .await
+        .unwrap()
+        .unwrap_or("".to_string());
+
     let tmpl = CreatePostTemplate {
         title: "Login Page",
         messages,
+        auth_name: &auth_name,
     };
 
     Html(tmpl.render().unwrap())

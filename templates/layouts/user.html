@@ -11,7 +11,14 @@
     <div
       class="flex border-b border-gray-500 h-14 justify-between bg-cyan-600 text-white px-12 items-center"
     >
-      <div class="font-bold text-xl">Blog</div>
+      <div class="font-bold flex">
+        <a href="/" class="mr-4 text-xl">Blog</a>
+        <div class="flex space-x-4">
+          <a href="/">posts</a>
+          <a href="/posts/create">create</a>
+        </div>
+      </div>
+
       <div class="flex items-center justify-between">
         {{auth_name}} |
 
