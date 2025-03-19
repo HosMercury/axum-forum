@@ -6,6 +6,7 @@ use axum::{
     response::{Html, IntoResponse, Redirect},
     routing::{get, post},
 };
+use axum_messages::Messages;
 use serde::Deserialize;
 use tower_sessions::Session;
 use validator::Validate;
@@ -58,12 +59,19 @@ pub struct LoginData {
 
 pub async fn post_login(
     session: Session,
+    messages: Messages,
     State(AppState { pool, .. }): State<AppState>,
     Form(data): Form<LoginData>,
 ) -> Redirect {
     // validate the upcoming data
     if let Err(errors) = data.validate() {
         let error_messages = validation_errors(errors);
+
+        let mut messages = messages;
+
+        for error in error_messages {
+            messages = messages.error(error);
+        }
 
         Redirect::to("/login")
     } else {

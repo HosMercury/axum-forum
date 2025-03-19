@@ -8,7 +8,9 @@ use dotenvy::dotenv;
 use sqlx::PgPool;
 use std::env;
 use tower_http::services::{ServeDir, ServeFile};
-use tower_sessions::{Expiry, SessionManagerLayer, cookie::time::Duration};
+use tower_sessions::cookie::time::Duration;
+use tower_sessions::session_store::ExpiredDeletion;
+use tower_sessions::{Expiry, SessionManagerLayer};
 use tower_sessions_sqlx_store::PostgresStore;
 
 #[derive(Clone)]
@@ -17,7 +19,7 @@ struct AppState {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), sqlx::Error> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Load environment variables
     dotenv().ok();
 
@@ -33,11 +35,11 @@ async fn main() -> Result<(), sqlx::Error> {
     let session_store = PostgresStore::new(pool.clone());
     session_store.migrate().await?;
 
-    // let deletion_task = tokio::task::spawn(
-    //     session_store
-    //         .clone()
-    //         .continuously_delete_expired(tokio::time::Duration::from_secs(60)),
-    // );
+    let deletion_task = tokio::task::spawn(
+        session_store
+            .clone()
+            .continuously_delete_expired(tokio::time::Duration::from_secs(60)),
+    );
 
     let session_layer = SessionManagerLayer::new(session_store)
         .with_secure(false)
@@ -63,7 +65,7 @@ async fn main() -> Result<(), sqlx::Error> {
     let listener = tokio::net::TcpListener::bind("0.0.0.0:4000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 
-    // deletion_task.await??;
+    deletion_task.await??;
 
     Ok(())
 }
