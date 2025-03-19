@@ -1,3 +1,12 @@
-{% extends "./layouts/user.html" %}
+{% extends "./layouts/user.html" %} {% block content %}
 
-<h1>All Posts</h1>
+<div class="flex justify-between items-center px-8">
+  <h1 class="p-4">All Posts</h1>
+  <a href="/posts/create">+ Create post</a>
+</div>
+{% for post in posts %}
+<div class="py-4 border bg-gray-200 rounded m-4 p-3">
+  <h2 class="font-bld text-lg">{{post.title}}</h2>
+  <p>{{post.content}}</p>
+</div>
+{% endfor %} {% endblock content %}

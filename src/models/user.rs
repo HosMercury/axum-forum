@@ -1,9 +1,8 @@
 use chrono::{DateTime, Local};
 use password_auth::{generate_hash, verify_password};
 use serde::{Deserialize, Serialize};
-use sqlx::{PgPool, prelude::FromRow, query, query_as, query_scalar};
+use sqlx::{PgPool, prelude::FromRow, query_as, query_scalar};
 use tokio::task;
-use tower_sessions::Session;
 
 use crate::handlers::users_handler::{LoginData, RegisterData};
 
