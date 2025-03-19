@@ -53,11 +53,11 @@ impl User {
     }
 
     pub async fn email_exists(pool: &PgPool, email: &str) -> anyhow::Result<bool> {
-        let exists: bool = query_scalar("SELECT * FROM users WHERE email = $1")
+        let count: i64 = query_scalar("SELECT COUNT(*) FROM users WHERE email = $1")
             .bind(email)
             .fetch_one(pool)
             .await?;
 
-        Ok(true)
+        Ok(count > 0)
     }
 }

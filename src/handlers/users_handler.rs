@@ -23,12 +23,19 @@ pub fn users_router() -> Router<AppState> {
 #[template(path = "login.html")]
 struct LoginTemplate<'a> {
     title: &'a str,
+    messages: Vec<String>,
 }
 
 #[debug_handler]
-pub async fn login() -> impl IntoResponse {
+pub async fn login(messages: Messages) -> impl IntoResponse {
+    let messages = messages
+        .into_iter()
+        .map(|message| format!("{}: {}", message.level, message))
+        .collect::<Vec<_>>();
+
     let tmpl = LoginTemplate {
         title: "Login Page",
+        messages,
     };
 
     Html(tmpl.render().unwrap())
@@ -38,11 +45,18 @@ pub async fn login() -> impl IntoResponse {
 #[template(path = "register.html")]
 struct RegisterTemplate<'a> {
     title: &'a str,
+    messages: Vec<String>,
 }
 
-pub async fn register() -> impl IntoResponse {
+pub async fn register(messages: Messages) -> impl IntoResponse {
+    let messages = messages
+        .into_iter()
+        .map(|message| format!("{}: {}", message.level, message))
+        .collect::<Vec<_>>();
+
     let tmpl = RegisterTemplate {
         title: "Register Page",
+        messages,
     };
 
     Html(tmpl.render().unwrap())
@@ -79,6 +93,8 @@ pub async fn post_login(
         let login = User::login(&pool, data, &session).await;
 
         if let Err(_) = login {
+            messages.error("Invalid credentials");
+
             return Redirect::to("/login");
         }
 
@@ -103,6 +119,7 @@ pub struct RegisterData {
 
 pub async fn post_register(
     session: Session,
+    messages: Messages,
     State(AppState { pool, .. }): State<AppState>,
     Form(data): Form<RegisterData>,
 ) -> Redirect {
@@ -111,21 +128,31 @@ pub async fn post_register(
     if let Err(errors) = data.validate() {
         let error_messages = validation_errors(errors);
 
+        let mut messages = messages;
+
+        for error in error_messages {
+            messages = messages.error(error);
+        }
+
         Redirect::to("/register")
     } else {
         // if the data is valid we want to register the user
         let exists = User::email_exists(&pool, &data.email).await;
 
         if let Err(_) = exists {
+            messages.error("Something went wrong");
+            return Redirect::to("/register");
+        } else if exists.unwrap() {
+            messages.error("Email already exists");
             return Redirect::to("/register");
         }
 
         let register = User::register(&pool, data, &session).await;
 
         if let Err(_) = register {
-            return (Redirect::to("/register"));
+            return Redirect::to("/register");
         }
 
-        (Redirect::to("/"))
+        Redirect::to("/")
     }
 }

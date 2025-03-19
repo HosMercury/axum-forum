@@ -4,6 +4,7 @@ mod router;
 mod utils;
 
 use crate::router::router;
+use axum_messages::MessagesManagerLayer;
 use dotenvy::dotenv;
 use sqlx::PgPool;
 use std::env;
@@ -58,6 +59,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let serve_dir = ServeDir::new("assets").not_found_service(ServeFile::new("assets/index.html"));
 
     let app = router()
+        .layer(MessagesManagerLayer) // MUST BE BEFORE SESSION LAYER
         .layer(session_layer)
         .nest_service("/assets", serve_dir.clone())
         .with_state(app_state);
