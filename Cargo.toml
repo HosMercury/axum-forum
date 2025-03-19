@@ -4,10 +4,12 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+anyhow = "1.0.97"
 askama = { version = "0.12.1", features = ["serde_json"] }
-axum = { version = "0.7.9", features = ["macros", "json", "multipart"] }
-axum-flash = "0.8.0"
+axum = { version = "0.8.1", features = ["macros", "json", "multipart"] }
+chrono = { version = "0.4.40", features = ["serde"] }
 dotenvy = "0.15.7"
+password-auth = "1.0.0"
 serde = "1.0.219"
 sqlx = { version = "0.8.2", features = [
   "postgres",
@@ -18,4 +20,6 @@ sqlx = { version = "0.8.2", features = [
 ] }
 tokio = { version = "1.42.0", features = ["full"] }
 tower-http = { version = "0.6.2", features = ["fs", "trace"] }
+tower-sessions = "0.14.0"
+tower-sessions-sqlx-store = { version = "0.15.0", features = ["postgres"] }
 validator = { version = "0.20.0", features = ["derive"] }

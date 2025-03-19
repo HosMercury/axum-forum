@@ -1,24 +1,30 @@
 {% extends "./layouts/guest.html" %} {% block content %}
 <div class="h-full w-full">
-  <div class="p-4 bg-gray-200 border rounded w-96 mx-auto mt-40">
+  <div class="p-4 bg-gray-200 border rounded w-96 mx-auto mt-28">
     <div class="font-bold text-red-800 text-center text-2xl mb-2">Blog</div>
-    <h1 class="m-2 font-bold text-xl">Please Login</h1>
-    
+    <h1 class="m-2 font-bold text-xl">Please Register</h1>
+
     <form
       method="POST"
-      action="/login"
+      action="/register"
       class="flex flex-col justify-center p-4"
     >
+      <div class="py-4 flex flex-col">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" />
+      </div>
       <div class="py-4 flex flex-col">
         <label for="email">Email</label>
         <input type="text" id="email" name="email" />
       </div>
-
       <div class="py-4 flex flex-col">
         <label for="password">Password</label>
-        <input type="password" id="password" name="password" />
+        <input type="password" id="password" name="password" \ />
       </div>
-
+      <div class="py-4 flex flex-col">
+        <label for="confirm_password">Confirm Password</label>
+        <input type="password" id="confirm_password" name="confirm_password" />
+      </div>
       <div class="py-4">
         <button
           type="submit"
@@ -27,8 +33,7 @@
           Log in
         </button>
       </div>
-
-      <a href="/register">New user? Register</a>
+      <a href="/login">Have an account? Login</a>
     </form>
   </div>
 </div>

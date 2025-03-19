@@ -1,19 +1,19 @@
 mod handlers;
+mod models;
 mod router;
 mod utils;
 
 use crate::router::router;
-use axum::extract::FromRef;
-use axum_flash::Key;
 use dotenvy::dotenv;
 use sqlx::PgPool;
 use std::env;
 use tower_http::services::{ServeDir, ServeFile};
+use tower_sessions::{Expiry, SessionManagerLayer, cookie::time::Duration};
+use tower_sessions_sqlx_store::PostgresStore;
 
 #[derive(Clone)]
 struct AppState {
     pool: PgPool,
-    flash_config: axum_flash::Config,
 }
 
 #[tokio::main]
@@ -29,6 +29,20 @@ async fn main() -> Result<(), sqlx::Error> {
         .await
         .expect("Error connecting to database");
 
+    //// session
+    let session_store = PostgresStore::new(pool.clone());
+    session_store.migrate().await?;
+
+    // let deletion_task = tokio::task::spawn(
+    //     session_store
+    //         .clone()
+    //         .continuously_delete_expired(tokio::time::Duration::from_secs(60)),
+    // );
+
+    let session_layer = SessionManagerLayer::new(session_store)
+        .with_secure(false)
+        .with_expiry(Expiry::OnInactivity(Duration::seconds(10)));
+
     // println!("Successfully connected to PostgreSQL!");
 
     // let result: (i32,) = sqlx::query_as("SELECT 1 + 1").fetch_one(&pool).await?;
@@ -37,25 +51,19 @@ async fn main() -> Result<(), sqlx::Error> {
 
     // adding db to the global state
 
-    let app_state = AppState {
-        pool,
-        flash_config: axum_flash::Config::new(Key::generate()),
-    };
+    let app_state = AppState { pool };
 
-    impl FromRef<AppState> for axum_flash::Config {
-        fn from_ref(state: &AppState) -> axum_flash::Config {
-            state.flash_config.clone()
-        }
-    }
-    
     let serve_dir = ServeDir::new("assets").not_found_service(ServeFile::new("assets/index.html"));
 
     let app = router()
+        .layer(session_layer)
         .nest_service("/assets", serve_dir.clone())
         .with_state(app_state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:4000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
+
+    // deletion_task.await??;
 
     Ok(())
 }
