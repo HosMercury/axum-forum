@@ -38,4 +38,13 @@ impl Post {
 
         Ok(post)
     }
+
+    pub async fn delete(pool: &PgPool, id: i32) -> anyhow::Result<()> {
+        query("DELETE FROM posts WHERE id = $1")
+            .bind(id)
+            .execute(pool)
+            .await?;
+
+        Ok(())
+    }
 }

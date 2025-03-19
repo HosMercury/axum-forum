@@ -8,8 +8,16 @@
 </div>
 
 <div class="p-4 px-12 flex justify-between items-center">
-  <div class="cursor-pointer hover:underline text-cyan-600">Edit</div>
-  <div class="cursor-pointer hover:underline text-red-500">Delete</div>
+  <a
+    href="/posts/{{post.id}}/edit"
+    class="cursor-pointer hover:underline text-cyan-600"
+    >Edit</a
+  >
+  <a
+    href="/posts/{{post.id}}/delete"
+    class="cursor-pointer hover:underline text-red-500"
+    >Delete</a
+  >
 </div>
 
 {% endblock content %}

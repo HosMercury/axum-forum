@@ -17,6 +17,7 @@ pub fn posts_router() -> Router<AppState> {
         .route("/posts/create", get(create_post))
         .route("/posts/{id}", get(show_post))
         .route("/posts", post(post_post))
+        .route("/posts/{id}/delete", get(delete_post))
 }
 
 #[derive(Template)]
@@ -155,4 +156,16 @@ pub async fn show_post(
     };
 
     Html(tmpl.render().unwrap()).into_response()
+}
+
+pub async fn delete_post(
+    State(AppState { pool, .. }): State<AppState>,
+    Path(id): Path<i32>,
+) -> impl IntoResponse {
+    println!("delete post");
+    if let Err(_) = Post::delete(&pool, id).await {
+        return Redirect::to("/");
+    }
+
+    Redirect::to("/")
 }
