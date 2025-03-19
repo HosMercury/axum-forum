@@ -1,4 +1,5 @@
 mod handlers;
+mod auth_middleware;
 mod models;
 mod router;
 mod utils;
@@ -39,12 +40,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let deletion_task = tokio::task::spawn(
         session_store
             .clone()
-            .continuously_delete_expired(tokio::time::Duration::from_secs(60)),
+            .continuously_delete_expired(tokio::time::Duration::from_secs(60 * 60)),
     );
 
     let session_layer = SessionManagerLayer::new(session_store)
         .with_secure(false)
-        .with_expiry(Expiry::OnInactivity(Duration::seconds(10)));
+        .with_expiry(Expiry::OnInactivity(Duration::seconds(60 * 60 * 24)));
 
     // println!("Successfully connected to PostgreSQL!");
 

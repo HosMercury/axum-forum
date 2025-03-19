@@ -11,6 +11,7 @@ use crate::handlers::users_handler::{LoginData, RegisterData};
 #[serde(rename_all = "camelCase")]
 pub struct User {
     pub id: i32,
+    pub name: String,
     pub email: String,
 
     #[serde(skip_serializing)]
@@ -20,7 +21,7 @@ pub struct User {
 }
 
 impl User {
-    pub async fn login(pool: &PgPool, data: LoginData, session: &Session) -> anyhow::Result<bool> {
+    pub async fn login(pool: &PgPool, data: LoginData) -> anyhow::Result<User> {
         println!("{:?}", data.email);
 
         let user: User = query_as("SELECT * FROM users WHERE email = $1 ")
@@ -29,27 +30,25 @@ impl User {
             .await
             .unwrap();
 
-        task::spawn_blocking(move || verify_password(&data.password, &user.password)).await??;
+        let user_password = user.password.clone();
+        task::spawn_blocking(move || verify_password(&data.password, &user_password)).await??;
 
-        Ok(true)
+        Ok(user)
     }
 
-    pub async fn register(
-        pool: &PgPool,
-        data: RegisterData,
-        session: &Session,
-    ) -> anyhow::Result<bool> {
+    pub async fn register(pool: &PgPool, data: RegisterData) -> anyhow::Result<Self> {
         let hashed_password: String =
             task::spawn_blocking(move || generate_hash(&data.password)).await?;
 
-        query("INSERT INTO users (name, email, password) VALUES ($1, $2, $3)")
-            .bind(&data.name)
-            .bind(&data.email)
-            .bind(hashed_password)
-            .execute(pool)
-            .await?;
+        let user: User =
+            query_as("INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *")
+                .bind(&data.name)
+                .bind(&data.email)
+                .bind(hashed_password)
+                .fetch_one(pool)
+                .await?;
 
-        Ok(true)
+        Ok(user)
     }
 
     pub async fn email_exists(pool: &PgPool, email: &str) -> anyhow::Result<bool> {

@@ -17,6 +17,7 @@ pub fn users_router() -> Router<AppState> {
         .route("/login", post(post_login))
         .route("/register", get(register))
         .route("/register", post(post_register))
+        .route("/logout", post(logout))
 }
 
 #[derive(Template)]
@@ -90,13 +91,18 @@ pub async fn post_login(
         Redirect::to("/login")
     } else {
         // if the data is valid we want to check login in db
-        let login = User::login(&pool, data, &session).await;
+        let user = User::login(&pool, data).await;
 
-        if let Err(_) = login {
+        if let Err(_) = user {
             messages.error("Invalid credentials");
 
             return Redirect::to("/login");
         }
+
+        session
+            .insert("auth_name", user.unwrap().name)
+            .await
+            .unwrap();
 
         Redirect::to("/")
     }
@@ -147,12 +153,25 @@ pub async fn post_register(
             return Redirect::to("/register");
         }
 
-        let register = User::register(&pool, data, &session).await;
+        let user = User::register(&pool, data).await;
 
-        if let Err(_) = register {
+        if let Err(_) = user {
             return Redirect::to("/register");
         }
 
+        session
+            .insert("auth_name", user.unwrap().name)
+            .await
+            .unwrap();
+
         Redirect::to("/")
     }
+}
+
+pub async fn logout(session: Session) -> Redirect {
+    println!("Logged out");
+
+    session.flush().await.unwrap();
+
+    Redirect::to("/login")
 }

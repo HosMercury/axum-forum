@@ -12,7 +12,13 @@
       class="flex border-b border-gray-500 h-14 justify-between bg-cyan-600 text-white px-12 items-center"
     >
       <div class="font-bold text-xl">Blog</div>
-      <div>sign out</div>
+      <div class="flex items-center justify-between">
+        {{auth_name}} |
+
+        <form action="/logout" method="post">
+          <button class="cursor-pointer mx-2">Log out</button>
+        </form>
+      </div>
     </div>
     <main class="p-2 min-h-screen bg-gray-100">
       {% block content %} {% endblock %}
