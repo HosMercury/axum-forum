@@ -2,7 +2,7 @@ use crate::{AppState, models::post::Post, utils::validation_errors};
 use askama::Template;
 use axum::{
     Form, Router, debug_handler,
-    extract::State,
+    extract::{Path, State},
     response::{Html, IntoResponse, Redirect},
     routing::{get, post},
 };
@@ -15,6 +15,7 @@ pub fn posts_router() -> Router<AppState> {
     Router::new()
         .route("/", get(posts))
         .route("/posts/create", get(create_post))
+        .route("/posts/{id}", get(show_post))
         .route("/posts", post(post_post))
 }
 
@@ -54,7 +55,7 @@ pub async fn posts(
 
     println!("{:?}", auth_name);
 
-    Html(tmpl.render().unwrap())
+    Html(tmpl.render().unwrap()).into_response()
 }
 
 #[derive(Template)]
@@ -120,4 +121,38 @@ pub async fn post_post(
             Redirect::to("/")
         }
     }
+}
+
+#[derive(Template)]
+#[template(path = "show-post.html")]
+struct ShowPostTemplate<'a> {
+    title: &'a str,
+    auth_name: &'a str,
+    post: Post,
+}
+
+pub async fn show_post(
+    session: Session,
+    State(AppState { pool, .. }): State<AppState>,
+    Path(id): Path<i32>,
+) -> impl IntoResponse {
+    let auth_name: String = session
+        .get("auth_name")
+        .await
+        .unwrap()
+        .unwrap_or("".to_string());
+
+    let post_result = Post::find(&pool, id).await;
+
+    if let Err(_) = post_result {
+        return Redirect::to("/").into_response();
+    }
+
+    let tmpl = ShowPostTemplate {
+        title: "Posts Page",
+        auth_name: &auth_name,
+        post: post_result.unwrap(),
+    };
+
+    Html(tmpl.render().unwrap()).into_response()
 }
