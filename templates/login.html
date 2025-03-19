@@ -1,0 +1,32 @@
+{% extends "./layouts/guest.html" %} {% block content %}
+<div class="h-full w-full">
+  <div class="p-4 bg-gray-200 border rounded w-96 mx-auto mt-56">
+    <div class="font-bold text-red-800 text-center text-xl">Rustery Blog</div>
+
+    {% include "./partials/flash.html" %}
+    <form
+      method="POST"
+      action="/login"
+      class="flex flex-col justify-center p-4"
+    >
+      <div class="py-4 flex flex-col">
+        <label for="email">Email</label>
+        <input type="text" id="email" name="email" />
+      </div>
+      <div class="py-4 flex flex-col">
+        <label for="password">Pasword</label>
+        <input type="password" id="password" name="password" \ />
+      </div>
+
+      <div class="py-4">
+        <button
+          type="submit"
+          class="w-full cursor-pointer border bg-gray-800 rounded py-2 text-white"
+        >
+          Log in
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock content %}
