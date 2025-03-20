@@ -11,6 +11,8 @@ pub struct Post {
     pub title: String,
     pub content: String,
     pub created_at: DateTime<chrono::Local>,
+    pub user_id: i32,
+    pub user_name: String,
 }
 
 impl Post {
@@ -25,7 +27,12 @@ impl Post {
     }
 
     pub async fn all(pool: &PgPool) -> anyhow::Result<Vec<Post>> {
-        let posts = query_as("SELECT * FROM posts").fetch_all(pool).await?;
+        let posts = query_as(
+            "SELECT users.name AS user_name, 
+            post.* FROM posts join users ON user_id = posts.user_id",
+        )
+        .fetch_all(pool)
+        .await?;
 
         Ok(posts)
     }
@@ -41,6 +48,17 @@ impl Post {
 
     pub async fn delete(pool: &PgPool, id: i32) -> anyhow::Result<()> {
         query("DELETE FROM posts WHERE id = $1")
+            .bind(id)
+            .execute(pool)
+            .await?;
+
+        Ok(())
+    }
+
+    pub async fn update(pool: &PgPool, id: i32, data: &PostData) -> anyhow::Result<()> {
+        query("UPDATE posts SET title = $1, content = $2 WHERE id = $3")
+            .bind(&data.title)
+            .bind(&data.content)
             .bind(id)
             .execute(pool)
             .await?;

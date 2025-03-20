@@ -1,3 +1,4 @@
+use crate::models::user::User;
 use axum::{
     extract::Request,
     middleware::Next,
@@ -7,7 +8,7 @@ use tower_sessions::Session;
 
 pub async fn auth_middleware(session: Session, request: Request, next: Next) -> impl IntoResponse {
     match session
-        .get::<String>("auth_name")
+        .get::<User>("auth_user")
         .await
         .expect("Session getting user failed")
     {

@@ -13,7 +13,6 @@ pub struct User {
     pub name: String,
     pub email: String,
 
-    #[serde(skip_serializing)]
     pub password: String,
 
     pub created_at: DateTime<Local>,

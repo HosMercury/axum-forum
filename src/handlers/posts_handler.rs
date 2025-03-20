@@ -1,3 +1,5 @@
+use crate::filters::format_date;
+use crate::models::user::User;
 use crate::{AppState, models::post::Post, utils::validation_errors};
 use askama::Template;
 use axum::{
@@ -16,15 +18,17 @@ pub fn posts_router() -> Router<AppState> {
         .route("/", get(posts))
         .route("/posts/create", get(create_post))
         .route("/posts/{id}", get(show_post))
-        .route("/posts", post(post_post))
+        .route("/posts", post(save_post))
+        .route("/posts/{id}/update", post(update_post))
         .route("/posts/{id}/delete", get(delete_post))
+        .route("/posts/{id}/edit", get(edit_post))
 }
 
 #[derive(Template)]
 #[template(path = "home.html")]
 struct HomeTemplate<'a> {
     title: &'a str,
-    auth_name: &'a str,
+    auth_user: User,
     messages: Vec<String>,
     posts: Vec<Post>,
 }
@@ -39,22 +43,16 @@ pub async fn posts(
         .map(|message| format!("{}: {}", message.level, message))
         .collect::<Vec<_>>();
 
-    let auth_name: String = session
-        .get("auth_name")
-        .await
-        .unwrap()
-        .unwrap_or("".to_string());
+    let auth_user: User = session.get("auth_user").await.unwrap().unwrap();
 
     let posts = Post::all(&pool).await.unwrap_or(vec![]);
 
     let tmpl = HomeTemplate {
         title: "Posts Page",
-        auth_name: &auth_name,
+        auth_user,
         messages,
         posts,
     };
-
-    println!("{:?}", auth_name);
 
     Html(tmpl.render().unwrap()).into_response()
 }
@@ -64,7 +62,7 @@ pub async fn posts(
 struct CreatePostTemplate<'a> {
     title: &'a str,
     messages: Vec<String>,
-    auth_name: &'a str,
+    auth_user: User,
 }
 
 pub async fn create_post(messages: Messages, session: Session) -> impl IntoResponse {
@@ -73,19 +71,15 @@ pub async fn create_post(messages: Messages, session: Session) -> impl IntoRespo
         .map(|message| format!("{}: {}", message.level, message))
         .collect::<Vec<_>>();
 
-    let auth_name = session
-        .get("auth_name")
-        .await
-        .unwrap()
-        .unwrap_or("".to_string());
+    let auth_user: User = session.get("auth_user").await.unwrap().unwrap();
 
     let tmpl = CreatePostTemplate {
         title: "Create Post",
         messages,
-        auth_name: &auth_name,
+        auth_user,
     };
 
-    Html(tmpl.render().unwrap())
+    Html(tmpl.render().unwrap()).into_response()
 }
 
 #[derive(Serialize, Deserialize, Debug, Validate)]
@@ -98,7 +92,7 @@ pub struct PostData {
 }
 
 #[debug_handler]
-pub async fn post_post(
+pub async fn save_post(
     messages: Messages,
     State(AppState { pool, .. }): State<AppState>,
     Form(data): Form<PostData>,
@@ -128,7 +122,7 @@ pub async fn post_post(
 #[template(path = "show-post.html")]
 struct ShowPostTemplate<'a> {
     title: &'a str,
-    auth_name: &'a str,
+    auth_user: User,
     post: Post,
 }
 
@@ -137,11 +131,7 @@ pub async fn show_post(
     State(AppState { pool, .. }): State<AppState>,
     Path(id): Path<i32>,
 ) -> impl IntoResponse {
-    let auth_name: String = session
-        .get("auth_name")
-        .await
-        .unwrap()
-        .unwrap_or("".to_string());
+    let auth_user: User = session.get("auth_user").await.unwrap().unwrap();
 
     let post_result = Post::find(&pool, id).await;
 
@@ -151,7 +141,7 @@ pub async fn show_post(
 
     let tmpl = ShowPostTemplate {
         title: "Posts Page",
-        auth_name: &auth_name,
+        auth_user,
         post: post_result.unwrap(),
     };
 
@@ -168,4 +158,78 @@ pub async fn delete_post(
     }
 
     Redirect::to("/")
+}
+
+#[derive(Template)]
+#[template(path = "edit-post.html")]
+struct EditPostTemplate<'a> {
+    title: &'a str,
+    messages: Vec<String>,
+    auth_user: User,
+    post: Post,
+}
+
+pub async fn edit_post(
+    messages: Messages,
+    session: Session,
+    State(AppState { pool, .. }): State<AppState>,
+    Path(id): Path<i32>,
+) -> impl IntoResponse {
+    let messages = messages
+        .into_iter()
+        .map(|message| format!("{}: {}", message.level, message))
+        .collect::<Vec<_>>();
+
+    let auth_user: User = session.get("auth_user").await.unwrap().unwrap();
+
+    let post = match Post::find(&pool, id).await {
+        Ok(post) => post,
+        Err(_) => return Redirect::to("/").into_response(),
+    };
+
+    let tmpl = EditPostTemplate {
+        title: "Create Post",
+        messages,
+        auth_user,
+        post,
+    };
+
+    Html(tmpl.render().unwrap()).into_response()
+}
+
+pub async fn update_post(
+    messages: Messages,
+    session: Session,
+    State(AppState { pool, .. }): State<AppState>,
+    Path(id): Path<i32>,
+    Form(data): Form<PostData>,
+) -> impl IntoResponse {
+    if let Err(errors) = data.validate() {
+        let error_messages = validation_errors(errors);
+
+        let mut messages = messages;
+
+        for error in error_messages {
+            messages = messages.error(error);
+        }
+
+        return Redirect::to("/posts/create").into_response();
+    }
+
+    let auth_user: User = session.get("auth_user").await.unwrap().unwrap();
+
+    let post = match Post::find(&pool, id).await {
+        Ok(post) => post,
+        Err(_) => return Redirect::to("/").into_response(),
+    };
+
+    if let Err(_) = Post::create(&pool, &data).await {
+        messages.error("something went wrong");
+        return Redirect::to("/posts/create").into_response();
+    } else {
+        messages.success("Post created successfully");
+        return Redirect::to("/").into_response();
+    }
+
+    "".into_response()
 }

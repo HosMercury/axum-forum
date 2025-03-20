@@ -7,6 +7,6 @@
 {% for post in posts %}
 <div class="py-4 border bg-gray-200 rounded m-4 p-3">
   <a href="/posts/{{post.id}}" class="font-bld text-lg">{{post.title}}</a>
-  <p>{{post.content}}</p>
+  <p>{{post.created_at }}</p>
 </div>
 {% endfor %} {% endblock content %}

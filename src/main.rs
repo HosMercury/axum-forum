@@ -1,5 +1,6 @@
-mod handlers;
 mod auth_middleware;
+mod filters;
+mod handlers;
 mod models;
 mod router;
 mod utils;

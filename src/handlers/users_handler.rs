@@ -99,10 +99,7 @@ pub async fn post_login(
             return Redirect::to("/login");
         }
 
-        session
-            .insert("auth_name", user.unwrap().name)
-            .await
-            .unwrap();
+        session.insert("auth_user", user.unwrap()).await.unwrap();
 
         Redirect::to("/")
     }
@@ -159,10 +156,7 @@ pub async fn post_register(
             return Redirect::to("/register");
         }
 
-        session
-            .insert("auth_name", user.unwrap().name)
-            .await
-            .unwrap();
+        session.insert("auth_user", user.unwrap()).await.unwrap();
 
         Redirect::to("/")
     }
