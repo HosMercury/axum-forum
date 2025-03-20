@@ -1,6 +1,6 @@
 use chrono::DateTime;
 use serde::{Deserialize, Serialize};
-use sqlx::{PgPool, prelude::FromRow, query, query_as};
+use sqlx::{PgPool, Row, prelude::FromRow, query, query_as};
 
 use crate::handlers::posts_handler::PostData;
 
@@ -41,11 +41,19 @@ impl Post {
     }
 
     pub async fn find(pool: &PgPool, id: i32) -> anyhow::Result<Post> {
-        let post = query_as("SELECT * FROM posts WHERE id = $1")
-            .bind(id)
-            .fetch_one(pool)
-            .await?;
+        println!("---->\n{:?}", id);
+        let row = query(
+            "SELECT posts.*, users.name as user_name FROM posts 
+        join users ON users.id = posts.user_id
+        WHERE posts.id = $1",
+        )
+        .bind(id)
+        .fetch_one(pool)
+        .await?;
 
+        let mut post = Post::from_row(&row).unwrap();
+
+        post.user_name = row.try_get("user_name")?;
 
         Ok(post)
     }
