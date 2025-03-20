@@ -9,3 +9,9 @@ textarea {
 textarea {
   min-height: 100px !important;
 }
+
+body,
+html {
+  padding: 0px;
+  margin: 0px;
+}
