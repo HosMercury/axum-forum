@@ -32,7 +32,8 @@ impl Post {
     pub async fn all(pool: &PgPool) -> anyhow::Result<Vec<Post>> {
         let posts = query_as(
             "SELECT users.name AS user_name, 
-            posts.* FROM posts left join users ON users.id = posts.user_id",
+            posts.* FROM posts left join users ON users.id = posts.user_id 
+            order by posts.created_at desc",
         )
         .fetch_all(pool)
         .await?;
