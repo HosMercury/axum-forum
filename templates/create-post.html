@@ -1,11 +1,10 @@
-{% extends "./layouts/user.html" %} {% block content %}
+{% extends "./layouts/user_layout.html" %} {% block content %}
 <div class="p-12">
   <h2 class="font-bold text-xl">Create a post</h2>
 
   <div class="p-4 bg-gray-200 border rounded mx-auto mt-4">
     {% include "./partials/messages.html" %}
     <form action="/posts" method="post">
-
       <div class="py-4 flex flex-col">
         <label for="title">Title</label>
         <input type="text" id="title" name="title" />
