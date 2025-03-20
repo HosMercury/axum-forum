@@ -1,4 +1,3 @@
-use crate::filters::format_date;
 use crate::models::user::User;
 use crate::{AppState, models::post::Post, utils::validation_errors};
 use askama::Template;
@@ -17,11 +16,11 @@ pub fn posts_router() -> Router<AppState> {
     Router::new()
         .route("/", get(posts))
         .route("/posts/create", get(create_post))
-        .route("/posts/{id}", get(show_post))
         .route("/posts", post(save_post))
         .route("/posts/{id}/update", post(update_post))
         .route("/posts/{id}/delete", get(delete_post))
         .route("/posts/{id}/edit", get(edit_post))
+        .route("/posts/{id}", get(show_post))
 }
 
 #[derive(Template)]
@@ -94,6 +93,7 @@ pub struct PostData {
 #[debug_handler]
 pub async fn save_post(
     messages: Messages,
+    session: Session,
     State(AppState { pool, .. }): State<AppState>,
     Form(data): Form<PostData>,
 ) -> impl IntoResponse {
@@ -108,7 +108,9 @@ pub async fn save_post(
 
         Redirect::to("/posts/create")
     } else {
-        if let Err(_) = Post::create(&pool, &data).await {
+        let auth_user: User = session.get("auth_user").await.unwrap().unwrap();
+
+        if let Err(e) = Post::create(&pool, &data, auth_user.id).await {
             messages.error("something went wrong");
             Redirect::to("/posts/create")
         } else {
@@ -152,7 +154,6 @@ pub async fn delete_post(
     State(AppState { pool, .. }): State<AppState>,
     Path(id): Path<i32>,
 ) -> impl IntoResponse {
-    println!("delete post");
     if let Err(_) = Post::delete(&pool, id).await {
         return Redirect::to("/");
     }
@@ -223,13 +224,15 @@ pub async fn update_post(
         Err(_) => return Redirect::to("/").into_response(),
     };
 
-    if let Err(_) = Post::create(&pool, &data).await {
+    if post.user_id != auth_user.id {
+        return Redirect::to("/").into_response();
+    }
+
+    if let Err(_) = Post::update(&pool, id, &data).await {
         messages.error("something went wrong");
         return Redirect::to("/posts/create").into_response();
     } else {
         messages.success("Post created successfully");
         return Redirect::to("/").into_response();
     }
-
-    "".into_response()
 }

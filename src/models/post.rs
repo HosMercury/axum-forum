@@ -12,14 +12,17 @@ pub struct Post {
     pub content: String,
     pub created_at: DateTime<chrono::Local>,
     pub user_id: i32,
+
+    #[sqlx(skip)]
     pub user_name: String,
 }
 
 impl Post {
-    pub async fn create(pool: &PgPool, data: &PostData) -> anyhow::Result<()> {
-        query("INSERT INTO posts (title, content) VALUES ($1, $2)")
+    pub async fn create(pool: &PgPool, data: &PostData, auth_id: i32) -> anyhow::Result<()> {
+        query("INSERT INTO posts (title, content, user_id) VALUES ($1, $2, $3)")
             .bind(&data.title)
             .bind(&data.content)
+            .bind(auth_id)
             .execute(pool)
             .await?;
 
@@ -29,7 +32,7 @@ impl Post {
     pub async fn all(pool: &PgPool) -> anyhow::Result<Vec<Post>> {
         let posts = query_as(
             "SELECT users.name AS user_name, 
-            post.* FROM posts join users ON user_id = posts.user_id",
+            posts.* FROM posts left join users ON users.id = posts.user_id",
         )
         .fetch_all(pool)
         .await?;
@@ -42,6 +45,7 @@ impl Post {
             .bind(id)
             .fetch_one(pool)
             .await?;
+
 
         Ok(post)
     }

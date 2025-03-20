@@ -1,11 +1,14 @@
 {% extends "./layouts/user.html" %} {% block content %}
 <div class="p-12">
   <h2 class="font-bold text-xl">Show Post : {{post.title}}</h2>
-  <div>{{post.created_at}}</div>
+  <p>{{ post.created_at.format("%d-%m-%Y %I:%M %p")}}</p>
+
   <div class="p-4 bg-gray-200 border rounded mx-auto mt-4">
     {{post.content}}
   </div>
 </div>
+
+{% if post.user_id == auth_user.id %}
 
 <div class="p-4 px-12 flex justify-between items-center">
   <a
@@ -19,5 +22,4 @@
     >Delete</a
   >
 </div>
-
-{% endblock content %}
+{% endif %} {% endblock content %}

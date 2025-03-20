@@ -20,8 +20,6 @@ pub struct User {
 
 impl User {
     pub async fn login(pool: &PgPool, data: LoginData) -> anyhow::Result<User> {
-        println!("{:?}", data.email);
-
         let user: User = query_as("SELECT * FROM users WHERE email = $1 ")
             .bind(&data.email)
             .fetch_one(pool)

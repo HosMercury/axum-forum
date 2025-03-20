@@ -163,8 +163,6 @@ pub async fn post_register(
 }
 
 pub async fn logout(session: Session) -> Redirect {
-    println!("Logged out");
-
     session.flush().await.unwrap();
 
     Redirect::to("/login")
