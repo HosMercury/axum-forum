@@ -42,4 +42,4 @@ Using rust axum , follwing a tutorial on my channel on youtube to create a forum
 
 ### Covered
 
-![presentation](screenshots/presentation.png)
+![presentation](screenshots/presentation.jpeg)
