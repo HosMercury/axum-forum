@@ -313,27 +313,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "blog"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "askama",
- "askama-filters",
- "axum",
- "axum-messages",
- "chrono",
- "dotenvy",
- "password-auth",
- "serde",
- "sqlx",
- "tokio",
- "tower-http",
- "tower-sessions",
- "tower-sessions-sqlx-store",
- "validator",
-]
-
-[[package]]
 name = "bumpalo"
 version = "3.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -639,6 +618,27 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e13624c2627564efccf4934284bdd98cbaa14e79b0b5a141218e507b3a823456"
 dependencies = [
  "percent-encoding",
+]
+
+[[package]]
+name = "forum"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "askama",
+ "askama-filters",
+ "axum",
+ "axum-messages",
+ "chrono",
+ "dotenvy",
+ "password-auth",
+ "serde",
+ "sqlx",
+ "tokio",
+ "tower-http",
+ "tower-sessions",
+ "tower-sessions-sqlx-store",
+ "validator",
 ]
 
 [[package]]
