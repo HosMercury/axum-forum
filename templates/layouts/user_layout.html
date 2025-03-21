@@ -31,11 +31,19 @@
       </div>
 
       <div class="flex items-center justify-between">
-        {{auth_user.name}} |
+        {% include "./partials/icons/user-icon.html" %}
 
-        <form action="/logout" method="post">
-          <button class="cursor-pointer mx-2">Log out</button>
-        </form>
+        <span class="mx-2">{{auth_user.name}}</span>
+
+        <div
+          class="flex p-1 hover:text-cyan-600 hover:cursor-pointer hover:bg-white hover:rounded"
+        >
+          {% include "./partials/icons/exit-icon.html" %}
+
+          <form action="/logout" method="post">
+            <button class="cursor-pointer mx-2">Log out</button>
+          </form>
+        </div>
       </div>
     </div>
     <main class="p-2 min-h-screen bg-gray-100">

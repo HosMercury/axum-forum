@@ -50,7 +50,6 @@ impl Post {
     }
 
     pub async fn find(pool: &PgPool, id: i32) -> anyhow::Result<Post> {
-        println!("---->\n{:?}", id);
         let row = query(
             "SELECT posts.*, users.name as user_name FROM posts 
         join users ON users.id = posts.user_id
