@@ -39,3 +39,7 @@ Using rust axum , follwing a tutorial on my channel on youtube to create a forum
 ### Create Post form
 
 ![form](screenshots/form.png)
+
+### Covered
+
+![presentation](screenshots/presentation.png)
