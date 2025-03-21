@@ -15,3 +15,4 @@ Using rust axum , follwing a tutorial on my channel on youtube to create a forum
 - Downloading assets
 - Alpine Js menu show/hide .
 
+![Register](scsScreenshot 2025-03-21 at 10.54.36 PM.png)
