@@ -8,13 +8,13 @@ Using rust axum , follwing a tutorial on my channel on youtube to create a forum
 - Request Validation and flash messages.
 - MVC pattern ( Templating with Askama crate ).
 - Styling with Tailwind .
-- SQLx migrations, queries , joins and mapping ( postgres ).
+- SQLx migrations, queries, joins and mapping ( postgres ).
 - Dealing with Forms and flash messages.
 - Authorization.
 - Dates with chrono crate.
 - Rust modules.
 - Downloading assets.
-- Alpine Js menu show/hide.
+- AlpineJs menu show/hide.
 
 ### Register Page
 
@@ -42,4 +42,4 @@ Using rust axum , follwing a tutorial on my channel on youtube to create a forum
 
 ### Covered
 
-![presentation](screenshots/presentation1.jpeg)
+![presentation](screenshots/presentation2.jpeg)
