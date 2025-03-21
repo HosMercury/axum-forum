@@ -1,20 +1,19 @@
 {% extends "./layouts/guest_layout.html" %} {% block content %}
-<div class="h-screen w-full bg-gradient-to-t from-yellow-100 to-sky-300 pt-40">
+<div class="h-screen w-full pt-40">
   <div
     class="p-4 bg-white border shadow-lg border-slate-200 rounded w-96 mx-auto"
   >
-    <div class="font-bold text-red-800 text-center text-2xl mb-2">
+    <div
+      class="mt-4 font-bold bg-cyan-600 w-40 mx-auto shadow text-center text-2xl mb-2 rounded-3xl text-white p-2"
+    >
       Axum Blog
     </div>
-    <h1 class="m-2 font-bold text-xl">Please Login</h1>
+
+    <h1 class="mx-1 font-bold text-xl mt-6">Please Login</h1>
 
     {% include "./partials/messages.html" %}
 
-    <form
-      method="POST"
-      action="/login"
-      class="flex flex-col justify-center p-4"
-    >
+    <form method="POST" action="/login" class="flex flex-col justify-center">
       <div class="py-4 flex flex-col">
         <label for="email">Email</label>
         <input type="text" id="email" name="email" />

@@ -151,14 +151,26 @@ pub async fn show_post(
 }
 
 pub async fn delete_post(
+    session: Session,
     State(AppState { pool, .. }): State<AppState>,
     Path(id): Path<i32>,
 ) -> impl IntoResponse {
-    if let Err(_) = Post::delete(&pool, id).await {
-        return Redirect::to("/");
+    let auth_user: User = session.get("auth_user").await.unwrap().unwrap();
+
+    let post = match Post::find(&pool, id).await {
+        Ok(post) => post,
+        Err(_) => return Redirect::to("/").into_response(),
+    };
+
+    if post.user_id != auth_user.id {
+        return Redirect::to("/").into_response();
     }
 
-    Redirect::to("/")
+    if let Err(_) = Post::delete(&pool, id).await {
+        return Redirect::to("/").into_response();
+    }
+
+    Redirect::to("/").into_response()
 }
 
 #[derive(Template)]
