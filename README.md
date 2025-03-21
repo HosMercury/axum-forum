@@ -1,5 +1,7 @@
 # Axum forum ( Beginner friendly )
 
+![banner](screenshots/banner.png)
+
 Using rust axum , follwing a tutorial on my channel on youtube to create a forum project that covers these topics :
 
 - Authentication ( Login & Register ).

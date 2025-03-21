@@ -65,7 +65,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .nest_service("/assets", serve_dir.clone())
         .with_state(app_state);
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:4000").await.unwrap();
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:8000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 
     deletion_task.await??;
