@@ -10,7 +10,8 @@ use axum::{
 use axum_messages::Messages;
 use serde::{Deserialize, Serialize};
 use tower_sessions::Session;
-use validator::Validate;
+use validator::Validate;use convert_case::{Case, Casing};
+
 
 pub fn posts_router() -> Router<AppState> {
     Router::new()
