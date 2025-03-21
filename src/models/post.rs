@@ -1,8 +1,7 @@
+use crate::handlers::posts_handler::PostData;
 use chrono::DateTime;
 use serde::{Deserialize, Serialize};
-use sqlx::{PgPool, Row, prelude::FromRow, query, query_as};
-
-use crate::handlers::posts_handler::PostData;
+use sqlx::{PgPool, Row, prelude::FromRow, query};
 
 #[derive(Serialize, Deserialize, Clone, Default, FromRow, Debug)]
 #[serde(rename_all = "camelCase")]

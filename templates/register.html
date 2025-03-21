@@ -19,11 +19,16 @@
     >
       <div class="py-4 flex flex-col">
         <label for="name">Name</label>
-        <input type="text" id="name" name="name" />
+        <input type="text" id="name" name="name" value="{{form_data.name}}" />
       </div>
       <div class="py-4 flex flex-col">
         <label for="email">Email</label>
-        <input type="text" id="email" name="email" />
+        <input
+          type="text"
+          id="email"
+          name="email"
+          value="{{form_data.email}}"
+        />
       </div>
       <div class="py-4 flex flex-col">
         <label for="password">Password</label>

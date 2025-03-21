@@ -7,7 +7,7 @@ use axum::{
     routing::{get, post},
 };
 use axum_messages::Messages;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use tower_sessions::Session;
 use validator::Validate;
 
@@ -47,17 +47,24 @@ pub async fn login(messages: Messages) -> impl IntoResponse {
 struct RegisterTemplate<'a> {
     title: &'a str,
     messages: Vec<String>,
+    form_data: RegisterData,
 }
 
-pub async fn register(messages: Messages) -> impl IntoResponse {
+pub async fn register(messages: Messages, session: Session) -> impl IntoResponse {
     let messages = messages
         .into_iter()
         .map(|message| format!("{}: {}", message.level, message))
         .collect::<Vec<_>>();
 
+    let form_data: String = session.get("form_data").await.unwrap().unwrap_or_default();
+    let _: Option<String> = session.remove("form_data").await.unwrap();
+
+    let form_data: RegisterData = serde_json::from_str(&form_data).unwrap_or_default();
+
     let tmpl = RegisterTemplate {
         title: "Register Page",
         messages,
+        form_data,
     };
 
     Html(tmpl.render().unwrap())
@@ -105,7 +112,7 @@ pub async fn post_login(
     }
 }
 
-#[derive(Debug, Validate, Deserialize)]
+#[derive(Debug, Validate, Deserialize, Serialize, Default)]
 pub struct RegisterData {
     #[validate(length(min = 4, message = "Name must be at least 4 characters long"))]
     pub name: String,
@@ -136,6 +143,11 @@ pub async fn post_register(
         for error in error_messages {
             messages = messages.error(error);
         }
+
+        session
+            .insert("form_data", serde_json::to_string(&data).unwrap())
+            .await
+            .unwrap();
 
         Redirect::to("/register")
     } else {
