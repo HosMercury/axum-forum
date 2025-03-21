@@ -15,4 +15,22 @@ Using rust axum , follwing a tutorial on my channel on youtube to create a forum
 - Downloading assets
 - Alpine Js menu show/hide .
 
+# Register Page
+
 ![Register](screenshots/register.png)
+
+# Login Page
+
+![login](screenshots/login.png)
+
+# Home Page
+
+![Home](screenshots/home.png)
+
+# Post Page
+
+![Post](screenshots/post.png)
+
+# Create Post form
+
+![form](screenshots/form.png)
