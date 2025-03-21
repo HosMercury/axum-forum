@@ -8,10 +8,11 @@ use axum::{
     routing::{get, post},
 };
 use axum_messages::Messages;
+use convert_case::{Case, Casing};
 use serde::{Deserialize, Serialize};
+use sqlx::query;
 use tower_sessions::Session;
-use validator::Validate;use convert_case::{Case, Casing};
-
+use validator::Validate;
 
 pub fn posts_router() -> Router<AppState> {
     Router::new()
@@ -45,7 +46,7 @@ pub async fn posts(
 
     let auth_user: User = session.get("auth_user").await.unwrap().unwrap();
 
-    let posts = Post::all(&pool).await.unwrap_or(vec![]);
+    let posts = Post::all(&pool).await.unwrap_or_else(|_| vec![]);
 
     let tmpl = HomeTemplate {
         title: "Posts Page",
@@ -89,6 +90,17 @@ pub struct PostData {
 
     #[validate(length(min = 50, message = "Content must be at least 50 characters long"))]
     pub content: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Validate)]
+pub struct PostUserData {
+    #[validate(length(min = 8, message = "Title must be at least 8 characters long"))]
+    pub title: String,
+
+    #[validate(length(min = 50, message = "Content must be at least 50 characters long"))]
+    pub content: String,
+
+    pub user_id: i32,
 }
 
 #[debug_handler]
