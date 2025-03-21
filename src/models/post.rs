@@ -30,13 +30,21 @@ impl Post {
     }
 
     pub async fn all(pool: &PgPool) -> anyhow::Result<Vec<Post>> {
-        let posts = query_as(
+        let rows = query(
             "SELECT users.name AS user_name, 
             posts.* FROM posts left join users ON users.id = posts.user_id 
             order by posts.created_at desc",
         )
         .fetch_all(pool)
         .await?;
+
+        let mut posts = vec![];
+
+        for row in rows {
+            let mut post = Post::from_row(&row).unwrap();
+            post.user_name = row.try_get("user_name")?;
+            posts.push(post);
+        }
 
         Ok(posts)
     }
