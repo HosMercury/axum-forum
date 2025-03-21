@@ -5,6 +5,7 @@ Using rust axum , follwing a tutorial on my channel on youtube to create a forum
 - Authentication ( Login & Register ) .
 - Full CRUD app .
 - Routing and middlewares with Axum .
+- Request Validation and flash messages .
 - MVC pattern ( Templating with Askama crate ) .
 - Styling with Tailwind .
 - SQLx migrations, queries , joins and mapping ( postgres ) .
@@ -18,6 +19,10 @@ Using rust axum , follwing a tutorial on my channel on youtube to create a forum
 ### Register Page
 
 ![Register](screenshots/register.png)
+
+### Validation errors
+
+![Register](screenshots/errors.png)
 
 ### Login Page
 
