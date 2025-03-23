@@ -10,7 +10,6 @@ use axum::{
 use axum_messages::Messages;
 use convert_case::{Case, Casing};
 use serde::{Deserialize, Serialize};
-use sqlx::query;
 use tower_sessions::Session;
 use validator::Validate;
 
